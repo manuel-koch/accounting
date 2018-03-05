@@ -1,0 +1,32 @@
+{%- for grp in report.datasetMonthly() %}
+	<table class="pct" style="width: 100%; margin-bottom: 2em; border: solid thin silver;">
+	<tr>
+		<td colspan="3">
+			<div style="float:right;">
+				{% include 'widget_items_pie.accrep' %}
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td class="nowrap right"><h1>{{grp.label}}</h1></td>
+		<td class="nowrap right"><h1>{{grp.sum}}</h1></td>
+		<td></td>
+	</tr>
+    {%- for val in grp|sort(attribute='value',reverse=true) %}
+		{%- if val.value %}
+			<tr>
+			<td class="nowrap right"><h3>{{val.label}}</h3></td>
+			<td class="nowrap right"><h3>{{val.value}}</h3></td>
+			<td class="nowrap right">{{val.percent|round(1)}} %</td>
+			</tr>
+		    {%- for item in val.items %}
+				<tr class="items">
+					<td class="right">{{item.transaction.descr}}{% if item.descr %}: <i>{{item.descr}}</i>{% endif %} {{item.transaction.date}} </td>
+					<td class="nowrap right bottom">{{item.value}}</td>
+					<td></td>
+				</tr>
+		    {%- endfor %}            
+		{%- endif %}
+    {%- endfor %}            
+	</table>
+{%- endfor %}            

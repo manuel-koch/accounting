@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# PyCharm
+.idea
+
+# Accounting files
+accounting/gui/resources.py
+accounting/gui/icon.icns
+accounting/templates/**/*.html

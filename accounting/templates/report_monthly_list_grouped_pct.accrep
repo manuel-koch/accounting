@@ -1,0 +1,11 @@
+{% extends "report_base.accrep" %}
+{% block title %}
+Report items as list
+{% endblock %}
+{% block body %}
+<h1>Report</h1>
+<h2>Transactions from {{report.fromDate}} until {{report.tillDate}}</h2>
+{% include 'widget_items_pct_list.accrep' %}
+{% endblock %}
+</body>
+</html>

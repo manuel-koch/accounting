@@ -1,0 +1,56 @@
+{% set graphid=newid() %}
+<canvas id="canvas{{graphid}}" width="800" height="400"></canvas>
+<script>
+    var canvas = document.querySelector("#canvas{{graphid}}"),
+        context = canvas.getContext("2d");
+
+    var width = canvas.width,
+        height = canvas.height,
+        radius = Math.min(width, height) / 2;
+
+    var arc = d3.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(0)
+        .context(context);
+
+    var labelArc = d3.arc()
+        .outerRadius(radius - 40)
+        .innerRadius(radius - 40)
+        .context(context);
+
+    var pie = d3.pie()
+        .sort(null)
+        .value(function(d) { return d.number; });
+
+    context.translate(width / 2, height / 2);
+
+	var data{{graphid}} = [
+	    {%- for val in grp.sorted(8) %}
+	    	{"number": Math.abs({{val.value}}), "name": '{{val.label}}'} {% if not loop.last %},{% endif %}
+	    {%- endfor %}            
+	];
+
+    var colors = ["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"];
+
+    var arcs = pie(data{{graphid}});
+
+    arcs.forEach(function(d, i) {
+        context.beginPath();
+        context.fillStyle = colors[i];
+        arc(d);
+        context.fill();
+    });
+
+    context.beginPath();
+    arcs.forEach(arc);
+    context.strokeStyle = "#fff";
+    context.stroke();
+
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "#000";
+    arcs.forEach(function(d) {
+        var c = labelArc.centroid(d);
+        context.fillText(d.data.name, c[0], c[1]);
+    });
+</script>
