@@ -19,7 +19,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 from accounting.core.value import to_decimal
 from accounting.core.filter import Filter
-from core.dateutils import date_from_value
+from accounting.core.dateutils import date_from_value
 
 LOGGER = logging.getLogger(__name__)
 
