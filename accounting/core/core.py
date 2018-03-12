@@ -106,6 +106,11 @@ class Item(object):
     def value(self):
         return self._value
 
+    @property
+    def valueDerived(self):
+        sign = -1 if self._account and self._account.typeDerived in [Account.TYPE_EXPENSE, Account.TYPE_PROFIT] else 1
+        return self._value * sign
+
     def setValue(self, val):
         val = to_decimal(val)
         if val != self._value:
@@ -334,6 +339,14 @@ class AccountTreeItem(QObject):
         self._parentAccount = None
         self._childAccounts = []
 
+    def getRootAccount(self):
+        """Return parent account of this account if any."""
+        return self._parentAccount if self._parentAccount else self
+
+    def hasParentAccount(self):
+        """Return whether this account has a parent account."""
+        return self._parentAccount is not None
+
     def getParentAccount(self):
         """Return parent account of this account if any."""
         return self._parentAccount
@@ -387,6 +400,11 @@ class Account(AccountTreeItem):
                  TYPE_EXPENSE: "Expense",
                  TYPE_ASSET: "Asset",
                  TYPE_LIABILITY: "Liability"}
+    ALL_TYPES_BY_NAME = {ALL_TYPES[TYPE_UNKNOWN]: TYPE_UNKNOWN,
+                         ALL_TYPES[TYPE_PROFIT]: TYPE_PROFIT,
+                         ALL_TYPES[TYPE_EXPENSE]: TYPE_EXPENSE,
+                         ALL_TYPES[TYPE_ASSET]: TYPE_ASSET,
+                         ALL_TYPES[TYPE_LIABILITY]: TYPE_LIABILITY}
 
     # signal emitted when name of account changed
     nameChanged = pyqtSignal(str)
@@ -530,6 +548,14 @@ class Account(AccountTreeItem):
     def type(self):
         return self._type
 
+    @property
+    def typeDerived(self):
+        if self._type == Account.TYPE_UNKNOWN:
+            if self.hasParentAccount():
+                return self.getParentAccount().typeDerived
+            LOGGER.warning("Unknown derived type for {}".format(self.fullname))
+        return self._type
+
     def setType(self, newType):
         """Set type of this account."""
         if not newType in Account.ALL_TYPES:
@@ -556,10 +582,7 @@ class Account(AccountTreeItem):
         LOGGER.debug("Parsing %d accounts..." % len(accElements))
         for accElem in accElements:
             t = accElem.get("type")
-            try:
-                t = Account.ALL_TYPES.keys()[Account.ALL_TYPES.values().index()]
-            except:
-                t = Account.TYPE_UNKNOWN
+            t = Account.ALL_TYPES_BY_NAME.get(t, Account.TYPE_UNKNOWN)
             account = Account(name=accElem.get("name"), type_=t)
             if parentAccount:
                 parentAccount += account
@@ -866,6 +889,22 @@ class FilterDateRange(Filter):
         if isinstance(obj, Transaction):
             return obj.date >= self._fromDate and obj.date <= self._tillDate
         raise TypeError("Don't know how to handle type " + type(obj))
+
+
+class FilterAccountTypes(Filter):
+    """Accept given account types"""
+
+    def __init__(self, *types):
+        super().__init__()
+        self._types = tuple([type for type in types if type in Account.ALL_TYPES])
+
+    def _accepted(self, obj):
+        if isinstance(obj, Item):
+            return obj.account.typeDerived in self._types
+        elif isinstance(obj, Transaction):
+            return obj.hasItems(self)
+        else:
+            raise TypeError("Don't know how to handle type " + type(obj))
 
 
 class FilterAccounts(Filter):

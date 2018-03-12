@@ -1,0 +1,31 @@
+{%- for grp in report.datasetMonthlyTypes() %}
+	<table class="pct" style="width: 100%; margin-bottom: 2em; border: solid thin silver;">
+	<tr>
+		<td class="nowrap right"><h1>{{grp.label}}</h1></td>
+		<td class="nowrap right" style="width: 33%"></td>
+	</tr>
+    {%- for val in grp %}
+        <tr>
+        <td class="nowrap right"><h3>{{val.label}}</h3></td>
+        <td class="nowrap right"><h3>{{val.value}}</h3></td>
+        </tr>
+    {%- endfor %}
+	<tr>
+		<td class="nowrap right"><hr/></td>
+		<td class="nowrap right"><hr/></td>
+	</tr>
+    {%- for val in grp %}
+        <tr>
+        <td class="nowrap right"><h3>{{val.label}}</h3></td>
+        <td class="nowrap right"><h3>{{val.value}}</h3></td>
+        </tr>
+        {%- for item in val.items %}
+            <tr class="items">
+                <td class="right">{{item.account.fullname}}: {{item.transaction.descr}}{% if item.descr %}: <i>{{item.descr}}</i>{% endif %} {{item.transaction.date}} </td>
+                <td class="nowrap right bottom">{{item.valueDerived}}</td>
+                <td></td>
+            </tr>
+        {%- endfor %}
+    {%- endfor %}
+	</table>
+{%- endfor %}            

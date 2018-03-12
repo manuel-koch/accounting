@@ -9,8 +9,9 @@ import itertools
 from functools import total_ordering
 
 import jinja2
+from decimal import Decimal
 
-from accounting.core.core import Database, Account, Item
+from accounting.core.core import Database, Account, Item, FilterAccountTypes
 from accounting.core.core import FilterGreaterOrEqualDate, FilterLessOrEqualDate
 from accounting.core.core import FilterAccounts, FilterAccountsAndChildren, FilterNotAccountsAndChildren
 from accounting.core.dateutils import rangeDateFromTillByInterval, INTERVAL_MONTHLY
@@ -229,7 +230,7 @@ class ReportDatasetGroup(object):
 
     @property
     def sum(self):
-        """Return of all values in group"""
+        """Return sum of all values in group"""
         return sum(map(lambda v: v.value, self._values))
 
     @property
@@ -398,6 +399,28 @@ class Report(object):
                 dataset += ReportDatasetValue(acc.fullname, accsum, items)
         self._datasets["monthlyExpanded"] = dataset
         return self._datasets["monthlyExpanded"]
+
+    def datasetMonthlyTypes(self):
+        """Return dataset for items grouped by asset type and sum of values per monthly interval"""
+        if "monthlyTypes" in self._datasets:
+            return self._datasets["monthly"]
+        dataset = ReportDataset()
+        grp = ItemGroupingByDateRange(self._fromDate, self._tillDate, INTERVAL_MONTHLY)
+        grp += self
+        for label in grp.groups():
+            balance = Decimal()
+            dataset += ReportDatasetGroup(label)
+            for type in (Account.TYPE_ASSET, Account.TYPE_LIABILITY, Account.TYPE_PROFIT, Account.TYPE_EXPENSE):
+                typeFilter = FilterAccountTypes(type)
+                items = list(grp.groupItems(label, typeFilter))
+                typesum = sum([i.valueDerived for i in items])
+                if type in (Account.TYPE_PROFIT,Account.TYPE_EXPENSE):
+                    balance += typesum
+                items.sort(key=lambda x: x.date)
+                dataset += ReportDatasetValue(Account.ALL_TYPES[type], typesum, items)
+            dataset += ReportDatasetValue("Balance", balance, [])
+        self._datasets["monthlyTypes"] = dataset
+        return self._datasets["monthlyTypes"]
 
 
 class ReportTemplate(object):

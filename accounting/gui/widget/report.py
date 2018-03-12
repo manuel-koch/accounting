@@ -128,7 +128,8 @@ class AccountReport(QtWidgets.QWidget):
         td = datetime.date(td.year(), td.month(), td.day())
         self._report.setRange(fd, td)
         html = self._template.render(self._report)
-        outpath = os.path.join(self._template.basepath, os.path.splitext(self._template.name)[0] + ".html")
+        outname = "{}_{}_{}.html".format(fd, td, os.path.splitext(self._template.name)[0])
+        outpath = os.path.join(self._template.basepath, outname)
         with open(outpath, "w+", encoding="utf-8") as f:
             f.write(html)
         url = QtCore.QUrl.fromLocalFile(outpath).toString()

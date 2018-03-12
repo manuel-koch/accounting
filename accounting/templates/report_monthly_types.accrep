@@ -1,0 +1,11 @@
+{% extends "report_base.accrep" %}
+{% block title %}
+{{report.fromDate}} ... {{report.tillDate}}
+{% endblock %}
+{% block body %}
+<h1>Report</h1>
+<h2>Transactions by asset types from {{report.fromDate}} until {{report.tillDate}}</h2>
+{% include 'widget_type_items_sums.accrep' %}
+{% endblock %}
+</body>
+</html>
