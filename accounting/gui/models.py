@@ -464,8 +464,8 @@ class AccountTransactionsModel(QtCore.QAbstractTableModel):
             self.endRemoveRows()
             changed = True
         elif cachedRow.item is not None:
-            currAccItems = filter(lambda it: self._account.isSelfOrHasChildAccount(it.account),
-                                  cachedRow.item.transaction)
+            currAccItems = list(filter(lambda it: self._account.isSelfOrHasChildAccount(it.account),
+                                       cachedRow.item.transaction))
             if self._account.isSelfOrHasChildAccount(cachedRow.item.account) and len(currAccItems) == 1:
                 # there is just one item for current account
                 # removing this item will remove it's transaction from our account too
