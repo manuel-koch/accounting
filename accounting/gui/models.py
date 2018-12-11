@@ -646,7 +646,8 @@ class AccountTransactionsModel(QtCore.QAbstractTableModel):
                 if newItemRow == oldItemRow:
                     pass  # no change
                 elif newItemRow >= 0:
-                    self.beginMoveRows(pidx, oldItemRow, oldItemRow, pidx, newItemRow)
+                    destinationChild = newItemRow + (1 if oldItemRow < newItemRow else 0)
+                    self.beginMoveRows(pidx, oldItemRow, oldItemRow, pidx, destinationChild)
                     self.endMoveRows()
                     changed = False
                 else:
